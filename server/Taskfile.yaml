@@ -1,0 +1,42 @@
+version: '3'
+
+vars:
+  NAME: lit-log
+
+tasks:
+  clean:
+    cmds:
+      - cmd: rm -f -R build
+        ignore_error: true
+
+  run:
+    env:
+      CGO_ENABLED: 1
+      GODEBUG: cgocheck=0
+    cmds:
+      - go run --race -v cmd/main.go
+
+  build:
+    cmds:
+      - task: build_windows
+      - task: build_linux
+
+  build_windows:
+    env:
+      GOARCH: amd64
+      GOOS: windows
+      GODEBUG: cgocheck=0
+    cmds:
+      - cmd: mkdir build
+        ignore_error: true
+      - go build -v -o build/{{.NAME}}.exe cmd/main.go
+
+  build_linux:
+    env:
+      GOARCH: amd64
+      GOOS: linux
+      GODEBUG: cgocheck=0
+    cmds:
+      - cmd: mkdir build
+        ignore_error: true
+      - go build -v -o build/{{.NAME}} cmd/main.go
