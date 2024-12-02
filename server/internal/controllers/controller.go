@@ -14,15 +14,14 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 		DB: db,
 	}
 
-	routesBook := r.Group("/books")
-	routesBook.GET("/:id", h.GetBook)
-	routesBook.GET("/", h.GetAllBooks)
-	routesBook.POST("/", h.AddBook)
-	routesBook.DELETE("/:id", h.DeleteBook)
+	routes := r.Group("/books")
+	routes.GET("/:id", h.GetBook)
+	routes.GET("/", h.GetAllBooks)
+	routes.POST("/", h.AddBook)
+	routes.DELETE("/:id", h.DeleteBook)
 
-	routesReadingProgress := r.Group("/books/progress")
-	routesReadingProgress.GET("/:id", h.GetReadingProgress)
-	routesReadingProgress.PATCH("/", h.UpdateReadingProgress)
-	routesReadingProgress.PATCH("/:id", h.UpdateDailyGoal)
+	routes.GET("/progress/:id", h.GetReadingProgress)
+	// routes.PATCH("/progress/:id", h.UpdateReadingProgress)
+	routes.PATCH("/goal/:id", h.UpdateDailyGoal)
 	// routes.PUT("/:id", h.UpdateArticle)
 }

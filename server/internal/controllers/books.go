@@ -3,10 +3,8 @@ package controllers
 import (
 	"lit-log/internal/models/books"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type createBookInput struct {
@@ -50,8 +48,7 @@ func (h handler) AddBook(context *gin.Context) {
 		return
 	}
 
-	id, _ := gonanoid.New()
-	book := books.Book{Id: id, Title: input.Title, Author: input.Author, CreatedAt: time.Now()}
+	book := books.Book{Title: input.Title, Author: input.Author}
 	h.DB.Create(&book)
 
 	context.JSON(http.StatusOK, gin.H{"book": book})
