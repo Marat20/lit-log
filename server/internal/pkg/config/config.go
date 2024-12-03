@@ -8,7 +8,8 @@ import (
 )
 
 type Config struct {
-	Db DbConfig
+	Db      DbConfig
+	TgToken string
 }
 
 type DbConfig struct {
@@ -24,5 +25,6 @@ func LoadConfig() *Config {
 		Db: DbConfig{
 			Dsn: os.Getenv("DSN"),
 		},
+		TgToken: os.Getenv("TELEGRAM_API_TOKEN"),
 	}
 }
