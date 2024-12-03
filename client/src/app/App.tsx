@@ -1,14 +1,11 @@
-import { useEffect } from 'react';
+import { BookProgress, BookTitle } from "@/entities/book";
 
 function App() {
-  useEffect(() => {
-    console.log(window.Telegram.WebApp.bg_color);
-  }, []);
   return (
-    <>
-      <h1>Hello</h1>
-      <button>Press me</button>
-    </>
+    <main>
+      <BookTitle />
+      <BookProgress />
+    </main>
   );
 }
 

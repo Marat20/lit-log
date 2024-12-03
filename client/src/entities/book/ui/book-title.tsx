@@ -1,13 +1,16 @@
+import { useQuery } from "@tanstack/react-query";
+import { fetchBook } from "../model/api/api";
+
 export const BookTitle = () => {
-  // const { isLoading } = useQuery({
-  //   queryKey: ['title'],
-  //   queryFn: () => {
-  //     fetch('http://localhost:8080').then((res) => res.json() as Promise<Book>);
-  //   },
-  // });
+  const { data } = useQuery({
+    queryKey: ["title"],
+    queryFn: fetchBook,
+  });
+  
   return (
     <div>
-      <h1>{}</h1>
+      <h1>{data?.title}</h1>
+      <h2>{data?.author}</h2>
     </div>
   );
 };
