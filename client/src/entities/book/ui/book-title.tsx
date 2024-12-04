@@ -1,16 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
+import { FC } from "react";
 import { fetchBook } from "../model/api/api";
 
-export const BookTitle = () => {
+export const BookTitle: FC = () => {
   const { data } = useQuery({
-    queryKey: ["title"],
+    queryKey: ["book"],
     queryFn: fetchBook,
   });
-  
+
   return (
-    <div>
-      <h1>{data?.title}</h1>
-      <h2>{data?.author}</h2>
-    </div>
+    <section>
+      <h1>{data?.book.title}</h1>
+      <h2>{data?.book.author}</h2>
+    </section>
   );
 };

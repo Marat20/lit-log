@@ -1,12 +1,9 @@
-import { BookProgress, BookTitle } from "@/entities/book";
+import { ProgressPage } from "@/pages/progress-page";
 
-function App() {
+export const App = () => {
   return (
-    <main>
-      <BookTitle />
-      <BookProgress />
+    <main className='main'>
+      <ProgressPage />
     </main>
   );
-}
-
-export default App;
+};

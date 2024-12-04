@@ -1,3 +1,19 @@
-button {
-  background-color: var(--tg-theme-button-color);
+@use "./global.scss";
+@use "./reset.scss";
+
+.main {
+  height: 100vh;
+  padding: 20px;
+  background-color: var(--bg_color);
+}
+
+section {
+  padding: 20px;
+  border-radius: var(--border_radius);
+  background-color: var(--section_bg_color);
+  margin-bottom: 10px;
+}
+
+section:last-child {
+  margin-bottom: 0;
 }

@@ -113,7 +113,7 @@ func (h handler) updateCurrentPage(context *gin.Context) {
 		"updated_at": time.Now(),
 	}
 
-	if isDailyGoalDone {
+	if book.CurrentPage+input.PagesRead >= book.TotalPages {
 		updates["is_active"] = false
 		updates["is_done"] = true
 		updates["finished_at"] = time.Now()
@@ -127,5 +127,5 @@ func (h handler) updateCurrentPage(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"isDailyGoalDone": isDailyGoalDone})
+	context.JSON(http.StatusOK, gin.H{"isDailyGoalDone": isDailyGoalDone, "book": book})
 }

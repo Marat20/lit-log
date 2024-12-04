@@ -1,9 +1,13 @@
+import { BookProgress, BookTitle } from "@/entities/book";
+import { UpdatePagesRead } from "@/features/update-pages-read";
 import { FC } from "react";
 
-export const ProgressPage:FC = () => {
+export const ProgressPage: FC = () => {
   return (
-    <main>
-        <h1>sda</h1>
-    </main>
-  )
-}
+    <>
+      <BookTitle />
+      <BookProgress />
+      <UpdatePagesRead />
+    </>
+  );
+};

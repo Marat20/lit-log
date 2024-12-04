@@ -1,5 +1,5 @@
 export interface Book {
-  id: string;
+  ID: string;
   isActive: boolean;
   isDone: boolean;
   createdAt: string;
