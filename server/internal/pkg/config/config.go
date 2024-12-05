@@ -13,7 +13,7 @@ type Config struct {
 }
 
 type DbConfig struct {
-	Dsn string
+	Path string
 }
 
 func LoadConfig() *Config {
@@ -23,7 +23,7 @@ func LoadConfig() *Config {
 	}
 	return &Config{
 		Db: DbConfig{
-			Dsn: os.Getenv("DSN"),
+			Path: os.Getenv("PATH"),
 		},
 		TgToken: os.Getenv("TELEGRAM_API_TOKEN"),
 	}

@@ -5,22 +5,21 @@ import (
 )
 
 // type User struct {
-// 	ID string `json:"id" gorm:"primarykey"`
+// 	ID string `json:"id"`
 // }
 
 type Book struct {
-	ID          string    `gorm:"primarykey"`
-	IsActive    bool      `json:"isActive" gorm:"column:is_active"`
-	IsDone      bool      `json:"isDone" gorm:"column:is_done"`
-	CreatedAt   time.Time `json:"createdAt" gorm:"column:created_at"`
-	UpdatedAt   time.Time `json:"updatedAt" gorm:"column:updated_at"`
-	FinishedAt  time.Time `json:"finishedAt" gorm:"column:finished_at"`
-	Title       string    `json:"title" gorm:"column:title"`
-	Author      string    `json:"author" gorm:"column:author"`
-	TotalPages  uint      `json:"totalPages" gorm:"column:total_pages"`
-	CurrentPage uint      `json:"currentPage" gorm:"column:current_page"`
-	DailyGoal   uint      `json:"dailyGoal" gorm:"column:daily_goal"`
-	PagesRead   uint      `json:"pagesRead" gorm:"column:pages_read"`
-	// UserId          string    `json:"userId"  gorm:"column:user_id"`
-	// User            User      `gorm:"foreignKey:UserId;references:ID"`
+	ID          string
+	IsActive    bool               `json:"isActive"`
+	IsDone      bool               `json:"isDone"`
+	CreatedAt   time.Time          `json:"createdAt"`
+	UpdatedAt   time.Time          `json:"updatedAt"`
+	FinishedAt  time.Time          `json:"finishedAt"`
+	Title       string             `json:"title"`
+	Author      string             `json:"author"`
+	TotalPages  uint               `json:"totalPages"`
+	CurrentPage uint               `json:"currentPage"`
+	DailyGoal   uint               `json:"dailyGoal"`
+	PagesRead   map[time.Time]uint `json:"pagesRead"`
+	// UserId          string    `json:"userId"`
 }

@@ -25,8 +25,13 @@ func main() {
 
 	go tg.Start()
 
-	db := database.ConnectDB(*config, log)
-
+	db, err := database.ConnectDB(*config, log)
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
+	defer db.Close()
+	
 	server := server.New()
 
 	controllers.RegisterRoutes(server, db)

@@ -1,26 +1,38 @@
 package database
 
 import (
-	"lit-log/internal/models/books"
 	"lit-log/internal/pkg/config"
 	"log/slog"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	bolt "go.etcd.io/bbolt"
 )
 
-func ConnectDB(cfg config.Config, log *slog.Logger) *gorm.DB {
-	dsn := cfg.Db.Dsn
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+func ConnectDB(cfg config.Config, log *slog.Logger) (*bolt.DB, error) {
+	path := cfg.Db.Path
+	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {
-		log.Error("error connecting to database: " + err.Error())
+		return nil, err
 	}
 
-	if err := db.AutoMigrate(&books.Book{}); err != nil {
-		log.Error("error migrating database schema: " + err.Error())
+	log.Info("Connected to database")
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte("Books"))
+		if err != nil {
+			log.Error(err.Error())
+			return err
+		}
+		_, err = tx.CreateBucketIfNotExists([]byte("Users"))
+		if err != nil {
+			log.Error(err.Error())
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		log.Error(err.Error())
 	}
 
-	log.Info("Connected to DB")
-
-	return db
+	return db, nil
 }

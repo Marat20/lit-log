@@ -2,23 +2,23 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	bolt "go.etcd.io/bbolt"
 )
 
 type handler struct {
-	DB *gorm.DB
+	DB *bolt.DB
 }
 
-func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
+func RegisterRoutes(r *gin.Engine, db *bolt.DB) {
 	h := &handler{
 		DB: db,
 	}
 
-	books := r.Group("/books")
-	books.GET("/:id", h.getBook)
-	books.GET("/", h.getAllBooks)
-	books.POST("/", h.addBook)
-	books.DELETE("/:id", h.deleteBook)
-	books.PUT("/:id", h.updateCurrentPage)
+	routes := r.Group("/books")
+	routes.GET("/:id", h.getBook)
+	routes.GET("/", h.getAllBooks)
+	routes.POST("/", h.addBook)
+	routes.DELETE("/:id", h.deleteBook)
+	routes.PUT("/:id", h.updateCurrentPage)
 
 }

@@ -1,11 +1,14 @@
 package controllers
 
 import (
+	"encoding/json"
 	"lit-log/internal/models/books"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	bolt "go.etcd.io/bbolt"
+
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
@@ -24,7 +27,25 @@ func (h handler) getBook(context *gin.Context) {
 	id := context.Param("id")
 
 	var book books.Book
-	if err := h.DB.Where("ID = ?", id).First(&book).Error; err != nil {
+
+	err := h.DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Books"))
+		if b == nil {
+			return bolt.ErrBucketNotFound
+		}
+
+		bookData := b.Get([]byte(id))
+		if bookData == nil {
+			return bolt.ErrBucketNotFound
+		}
+
+		if err := json.Unmarshal(bookData, &book); err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "Запись не существует"})
 		return
 	}
@@ -33,13 +54,30 @@ func (h handler) getBook(context *gin.Context) {
 }
 
 func (h handler) getAllBooks(context *gin.Context) {
-	var books []books.Book
-	result := h.DB.Find(&books)
-	if result.Error != nil {
-		context.AbortWithError(http.StatusNotFound, result.Error)
+	var allBooks []books.Book
+
+	err := h.DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Books"))
+		if b == nil {
+			return bolt.ErrBucketNotFound
+		}
+
+		return b.ForEach(func(k, v []byte) error {
+			var book books.Book
+			if err := json.Unmarshal(v, &book); err != nil {
+				return err
+			}
+			allBooks = append(allBooks, book)
+			return nil
+		})
+	})
+
+	if err != nil {
+		context.AbortWithError(http.StatusNotFound, err)
+		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"books": books})
+	context.JSON(http.StatusOK, gin.H{"books": allBooks})
 }
 
 func (h handler) addBook(context *gin.Context) {
@@ -62,10 +100,25 @@ func (h handler) addBook(context *gin.Context) {
 		CurrentPage: 0,
 		IsActive:    true,
 		IsDone:      false,
-		PagesRead:   0,
+		PagesRead:   make(map[time.Time]uint),
 	}
 
-	if err := h.DB.Create(&book).Error; err != nil {
+	err := h.DB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Books"))
+		if b == nil {
+			return bolt.ErrBucketNotFound
+		}
+
+		bookData, err := json.Marshal(book)
+		if err != nil {
+			return err
+		}
+
+		return b.Put([]byte(book.ID), bookData)
+
+	})
+
+	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -76,14 +129,26 @@ func (h handler) addBook(context *gin.Context) {
 func (h handler) deleteBook(context *gin.Context) {
 	bookID := context.Param("id")
 
-	var book books.Book
-	if err := h.DB.Where("id = ?", bookID).First(&book).Error; err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Record does not exist"})
-		return
-	}
+	err := h.DB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Books"))
+		if b == nil {
+			return bolt.ErrBucketNotFound
+		}
 
-	if err := h.DB.Delete(&book).Error; err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete record"})
+		bookData := b.Get([]byte(bookID))
+		if bookData == nil {
+			return bolt.ErrBucketNotFound
+		}
+
+		return b.Delete([]byte(bookID))
+	})
+
+	if err != nil {
+		if err == bolt.ErrBucketNotFound {
+			context.JSON(http.StatusBadRequest, gin.H{"error": "Запись не существует"})
+		} else {
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось удалить запись"})
+		}
 		return
 	}
 
@@ -91,13 +156,9 @@ func (h handler) deleteBook(context *gin.Context) {
 }
 
 func (h handler) updateCurrentPage(context *gin.Context) {
-	id := context.Param("id")
+	bookId := context.Param("id")
 
 	var book books.Book
-	if result := h.DB.Where("id = ?", id).First(&book); result.Error != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Record does not exist"})
-		return
-	}
 
 	var input updateBookInput
 	if err := context.ShouldBindJSON(&input); err != nil {
@@ -105,27 +166,45 @@ func (h handler) updateCurrentPage(context *gin.Context) {
 		return
 	}
 
-	pagesRead := book.PagesRead + input.PagesRead
-	isDailyGoalDone := pagesRead >= book.DailyGoal
+	err := h.DB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Books"))
+		if b == nil {
+			return bolt.ErrBucketNotFound
+		}
 
-	updates := map[string]interface{}{
-		"pages_read": pagesRead,
-		"updated_at": time.Now(),
-	}
+		bookData := b.Get([]byte(bookId))
+		if bookData == nil {
+			return bolt.ErrBucketNotFound
+		}
 
-	if book.CurrentPage+input.PagesRead >= book.TotalPages {
-		updates["is_active"] = false
-		updates["is_done"] = true
-		updates["finished_at"] = time.Now()
-		updates["current_page"] = book.TotalPages
-	} else {
-		updates["current_page"] = book.CurrentPage + input.PagesRead
-	}
+		if err := json.Unmarshal(bookData, &book); err != nil {
+			return err
+		}
 
-	if err := h.DB.Model(&book).Updates(updates).Error; err != nil {
+		book.PagesRead[time.Now()] = input.PagesRead
+		book.UpdatedAt = time.Now()
+
+		if book.CurrentPage+input.PagesRead >= book.TotalPages {
+			book.IsActive = false
+			book.IsDone = true
+			book.FinishedAt = time.Now()
+			book.CurrentPage = book.TotalPages
+		} else {
+			book.CurrentPage += input.PagesRead
+		}
+
+		updatedBook, err := json.Marshal(book)
+		if err != nil {
+			return err
+		}
+
+		return b.Put([]byte(book.ID), updatedBook)
+	})
+
+	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"isDailyGoalDone": isDailyGoalDone, "book": book})
+	context.JSON(http.StatusOK, gin.H{"book": book})
 }
