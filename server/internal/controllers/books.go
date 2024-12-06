@@ -50,7 +50,9 @@ func (h handler) getBook(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"book": book})
+	pagesReadToday := CountPagesReadToday(book.PagesRead)
+
+	context.JSON(http.StatusOK, gin.H{"book": book, "pagesReadToday": pagesReadToday})
 }
 
 func (h handler) getAllBooks(context *gin.Context) {
@@ -123,7 +125,9 @@ func (h handler) addBook(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"book": book})
+	pagesReadToday := CountPagesReadToday(book.PagesRead)
+
+	context.JSON(http.StatusOK, gin.H{"book": book, "pagesReadToday": pagesReadToday})
 }
 
 func (h handler) deleteBook(context *gin.Context) {
@@ -181,6 +185,10 @@ func (h handler) updateCurrentPage(context *gin.Context) {
 			return err
 		}
 
+		if book.IsDone {
+			return nil
+		}
+
 		book.PagesRead[time.Now()] = input.PagesRead
 		book.UpdatedAt = time.Now()
 
@@ -206,5 +214,24 @@ func (h handler) updateCurrentPage(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"book": book})
+	pagesReadToday := CountPagesReadToday(book.PagesRead)
+
+	context.JSON(http.StatusOK, gin.H{"book": book, "pagesReadToday": pagesReadToday})
+}
+
+func CountPagesReadToday(pagesRead map[time.Time]uint) uint {
+	if len(pagesRead) == 0 {
+		return 0
+	}
+
+	today := time.Now().Truncate(24 * time.Hour)
+	var totalPages uint
+
+	for date, pages := range pagesRead {
+		if date.Truncate(24 * time.Hour).Equal(today) {
+			totalPages += pages
+		}
+	}
+
+	return totalPages
 }

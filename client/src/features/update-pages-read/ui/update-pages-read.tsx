@@ -18,7 +18,10 @@ export const UpdatePagesRead: FC = () => {
   const { mutate } = useMutation({
     mutationFn: fetchUpdatePagesRead,
     onSuccess: (data: ReturnData) => {
-      queryClient.setQueryData(["book"], { book: data.book });
+      queryClient.setQueryData(["book"], {
+        book: data.book,
+        pagesReadToday: data.pagesReadToday,
+      });
     },
   });
 
