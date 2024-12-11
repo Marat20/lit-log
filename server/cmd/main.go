@@ -1,7 +1,7 @@
 package main
 
 import (
-	"lit-log/internal/controllers"
+	"lit-log/internal/controllers/book"
 	"lit-log/internal/pkg/config"
 	"lit-log/internal/pkg/database"
 	"lit-log/internal/pkg/logging"
@@ -23,6 +23,8 @@ func main() {
 
 	tg := telegram.New(config, log)
 
+	
+
 	go tg.Start()
 
 	db, err := database.ConnectDB(*config, log)
@@ -30,11 +32,12 @@ func main() {
 		log.Error(err.Error())
 		return
 	}
+
 	defer db.Close()
-	
+
 	server := server.New()
 
-	controllers.RegisterRoutes(server, db)
+	book.RegisterRoutes(server, db)
 
 	server.Run()
 }

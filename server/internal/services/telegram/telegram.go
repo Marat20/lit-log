@@ -20,10 +20,6 @@ func New(config *config.Config, log *slog.Logger) *tele.Bot {
 		return nil
 	}
 
-	b.Handle("/hello", func(c tele.Context) error {
-		return c.Send("Hello!")
-	})
-
 	log.Info("Telegram bot started")
 
 	return b

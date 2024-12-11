@@ -4,9 +4,9 @@ import (
 	"time"
 )
 
-// type User struct {
-// 	ID string `json:"id"`
-// }
+type User struct {
+	ID int64 `json:"id"`
+}
 
 type Book struct {
 	ID          string
@@ -21,5 +21,5 @@ type Book struct {
 	CurrentPage uint               `json:"currentPage"`
 	DailyGoal   uint               `json:"dailyGoal"`
 	PagesRead   map[time.Time]uint `json:"pagesRead"`
-	// UserId          string    `json:"userId"`
+	UserId      User               `json:"userId"`
 }
