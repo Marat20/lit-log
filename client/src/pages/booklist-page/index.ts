@@ -1,0 +1,1 @@
+export { BookListPageLazy } from './ui/booklist-page.lazy'

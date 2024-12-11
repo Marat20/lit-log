@@ -2,11 +2,11 @@ import {
   BookProgressDailyGoal,
   BookProgressTotalPages,
   BookTitle,
-} from "@/entities/book";
-import { UpdatePagesRead } from "@/features/update-pages-read";
-import { FC } from "react";
+} from '@/entities/book';
+import { UpdatePagesRead } from '@/features/update-pages-read';
+import { FC } from 'react';
 
-export const ProgressPage: FC = () => {
+const ProgressPage: FC = () => {
   return (
     <>
       <BookTitle />
@@ -16,3 +16,5 @@ export const ProgressPage: FC = () => {
     </>
   );
 };
+
+export default ProgressPage;

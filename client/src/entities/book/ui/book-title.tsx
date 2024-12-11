@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
-import { fetchBook } from "../model/api/api";
+import { fetchBook } from "../api/api";
 
 export const BookTitle: FC = () => {
   const { data } = useQuery({

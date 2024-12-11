@@ -1,5 +1,5 @@
-@use "./global.scss";
-@use "./reset.scss";
+@use './global.scss';
+@use './reset.scss';
 
 .main {
   height: 100vh;
@@ -12,8 +12,8 @@ section {
   border-radius: var(--border_radius);
   background-color: var(--section_bg_color);
   margin-bottom: 10px;
-}
 
-section:last-child {
-  margin-bottom: 0;
+  &:last-child {
+    margin-bottom: 0;
+  }
 }

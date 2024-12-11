@@ -13,3 +13,21 @@
     margin: 0 5px;
   }
 }
+
+// BookCard
+
+.card {
+  padding: 10px;
+  border-radius: var(--border_radius);
+  background-color: var(--section_bg_color);
+  margin-bottom: 10px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .down {
+    display: flex;
+    justify-content: space-between;
+  }
+}

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
-import { fetchBook } from "../model/api/api";
+import { fetchBook } from "../api/api";
 import cls from "./book.module.scss";
 
 export const BookProgressTotalPages: FC = () => {

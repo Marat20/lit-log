@@ -1,1 +1,1 @@
-export { ProgressPage } from "./ui/progress-page";
+export { ProgressPageLazy } from './ui/progress-page.lazy';
