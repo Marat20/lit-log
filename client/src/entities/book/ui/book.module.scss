@@ -22,10 +22,6 @@
   background-color: var(--section_bg_color);
   margin-bottom: 10px;
 
-  &:last-child {
-    margin-bottom: 0;
-  }
-
   .down {
     display: flex;
     justify-content: space-between;

@@ -17,7 +17,7 @@ export const BookCard: FC<BookCardProps> = (props) => {
   };
 
   return (
-    <div className={clsx('card', classes)}>
+    <div className={clsx(cls.card, {...classes})}>
       <h3>{title}</h3>
       <div className={cls.down}>
         <h4>{author}</h4>

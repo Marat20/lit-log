@@ -1,4 +1,4 @@
-package book
+package book_controllers
 
 import (
 	"github.com/gin-gonic/gin"
@@ -14,11 +14,12 @@ func RegisterRoutes(r *gin.Engine, db *bolt.DB) {
 		DB: db,
 	}
 
-	routes := r.Group("/books")
-	routes.GET("/:id", h.getBook)
+	routes := r.Group("/:userId")
+	routes.GET("/init", h.initUser)
+	routes.GET("/:bookId", h.getBook)
 	routes.GET("/", h.getAllBooks)
 	routes.POST("/", h.addBook)
-	routes.DELETE("/:id", h.deleteBook)
-	routes.PUT("/:id", h.updateCurrentPage)
+	routes.DELETE("/:bookId", h.deleteBook)
+	routes.PUT("/:bookId", h.updateCurrentPage)
 
 }

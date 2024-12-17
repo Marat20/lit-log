@@ -1,4 +1,4 @@
-package telegram
+package telegram_controllers
 
 import (
 	bolt "go.etcd.io/bbolt"
@@ -14,6 +14,6 @@ func RegisterRoutes(tg *telebot.Bot, db *bolt.DB) {
 		DB: db,
 	}
 
-	tg.Handle("/start", h.RegisterUser)
+	tg.Handle("/start", h.StartUser)
 
 }

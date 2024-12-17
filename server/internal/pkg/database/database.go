@@ -22,11 +22,6 @@ func ConnectDB(cfg config.Config, log *slog.Logger) (*bolt.DB, error) {
 			log.Error(err.Error())
 			return err
 		}
-		_, err = tx.CreateBucketIfNotExists([]byte("Users"))
-		if err != nil {
-			log.Error(err.Error())
-			return err
-		}
 		return nil
 	})
 

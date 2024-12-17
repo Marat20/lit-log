@@ -1,5 +1,5 @@
-import { Book } from '@/entities/book';
-import { URL } from '@/shared/api/api';
+import { Book } from "@/entities/book";
+import { URL } from "@/shared/api/api";
 
 export const fetchBooks = async (): Promise<{ books: Book[] } | undefined> => {
   try {

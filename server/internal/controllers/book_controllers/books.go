@@ -1,4 +1,4 @@
-package book
+package book_controllers
 
 import (
 	"encoding/json"
@@ -23,10 +23,8 @@ type updateBookInput struct {
 	PagesRead uint `json:"pagesRead" binding:"required"`
 }
 
-func (h handler) getBook(context *gin.Context) {
-	id := context.Param("id")
-
-	var book books.Book
+func (h handler) initUser(context *gin.Context) {
+	userId := context.Param("userId")
 
 	err := h.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Books"))
@@ -34,12 +32,48 @@ func (h handler) getBook(context *gin.Context) {
 			return bolt.ErrBucketNotFound
 		}
 
-		bookData := b.Get([]byte(id))
-		if bookData == nil {
+		userData := b.Get([]byte(userId))
+		if userData == nil {
+			books := []books.Book{}
+
+			booksJson, err := json.Marshal(books)
+			if err != nil {
+				return err
+			}
+
+			return b.Put([]byte(userId), booksJson)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Запись не существует"})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"success": true})
+
+}
+
+func (h handler) getBook(context *gin.Context) {
+	userId := context.Param("userId")
+	bookId := context.Param("bookId")
+
+	var booksList []books.Book
+
+	err := h.DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Books"))
+		if b == nil {
 			return bolt.ErrBucketNotFound
 		}
 
-		if err := json.Unmarshal(bookData, &book); err != nil {
+		booksData := b.Get([]byte(userId))
+		if booksData == nil {
+			return bolt.ErrBucketNotFound
+		}
+
+		if err := json.Unmarshal(booksData, &booksList); err != nil {
 			return err
 		}
 		return nil
@@ -50,12 +84,22 @@ func (h handler) getBook(context *gin.Context) {
 		return
 	}
 
+	var book books.Book
+
+	for _, val := range booksList {
+		if bookId == val.ID {
+			book = val
+			break
+		}
+	}
+
 	pagesReadToday := CountPagesReadToday(book.PagesRead)
 
 	context.JSON(http.StatusOK, gin.H{"book": book, "pagesReadToday": pagesReadToday})
 }
 
 func (h handler) getAllBooks(context *gin.Context) {
+	userId := context.Param("userId")
 	var allBooks []books.Book
 
 	err := h.DB.View(func(tx *bolt.Tx) error {
@@ -64,14 +108,16 @@ func (h handler) getAllBooks(context *gin.Context) {
 			return bolt.ErrBucketNotFound
 		}
 
-		return b.ForEach(func(k, v []byte) error {
-			var book books.Book
-			if err := json.Unmarshal(v, &book); err != nil {
-				return err
-			}
-			allBooks = append(allBooks, book)
-			return nil
-		})
+		booksData := b.Get([]byte(userId))
+		if booksData == nil {
+			return bolt.ErrBucketNotFound
+		}
+
+		if err := json.Unmarshal(booksData, &allBooks); err != nil {
+			return err
+		}
+
+		return nil
 	})
 
 	if err != nil {

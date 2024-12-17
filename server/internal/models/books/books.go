@@ -9,7 +9,7 @@ type User struct {
 }
 
 type Book struct {
-	ID          string
+	ID          string             `json:"id"`
 	IsActive    bool               `json:"isActive"`
 	IsDone      bool               `json:"isDone"`
 	CreatedAt   time.Time          `json:"createdAt"`
@@ -21,5 +21,4 @@ type Book struct {
 	CurrentPage uint               `json:"currentPage"`
 	DailyGoal   uint               `json:"dailyGoal"`
 	PagesRead   map[time.Time]uint `json:"pagesRead"`
-	UserId      User               `json:"userId"`
 }
