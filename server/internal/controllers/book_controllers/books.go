@@ -93,7 +93,7 @@ func (h handler) getBook(context *gin.Context) {
 		}
 	}
 
-	pagesReadToday := CountPagesReadToday(book.PagesRead)
+	pagesReadToday := countPagesReadToday(book.PagesRead)
 
 	context.JSON(http.StatusOK, gin.H{"book": book, "pagesReadToday": pagesReadToday})
 }
@@ -171,7 +171,7 @@ func (h handler) addBook(context *gin.Context) {
 		return
 	}
 
-	pagesReadToday := CountPagesReadToday(book.PagesRead)
+	pagesReadToday := countPagesReadToday(book.PagesRead)
 
 	context.JSON(http.StatusOK, gin.H{"book": book, "pagesReadToday": pagesReadToday})
 }
@@ -260,12 +260,12 @@ func (h handler) updateCurrentPage(context *gin.Context) {
 		return
 	}
 
-	pagesReadToday := CountPagesReadToday(book.PagesRead)
+	pagesReadToday := countPagesReadToday(book.PagesRead)
 
 	context.JSON(http.StatusOK, gin.H{"book": book, "pagesReadToday": pagesReadToday})
 }
 
-func CountPagesReadToday(pagesRead map[time.Time]uint) uint {
+func countPagesReadToday(pagesRead map[time.Time]uint) uint {
 	if len(pagesRead) == 0 {
 		return 0
 	}

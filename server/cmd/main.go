@@ -1,8 +1,8 @@
 package main
 
 import (
-	"lit-log/internal/controllers/book_controllers"
-	"lit-log/internal/controllers/telegram_controllers"
+	bookControllers "lit-log/internal/controllers/book_controllers"
+	telegramControllers "lit-log/internal/controllers/telegram_controllers"
 	"lit-log/internal/pkg/config"
 	"lit-log/internal/pkg/database"
 	"lit-log/internal/pkg/logging"
@@ -36,9 +36,9 @@ func main() {
 
 	server := server.New()
 
-	book_controllers.RegisterRoutes(server, db)
+	bookControllers.RegisterRoutes(server, db)
 
-	telegram_controllers.RegisterRoutes(tg, db)
+	telegramControllers.RegisterRoutes(tg, db)
 
 	server.Run()
 }
