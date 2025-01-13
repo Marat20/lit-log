@@ -24,7 +24,8 @@ type updateBookInput struct {
 	PagesRead uint `json:"pagesRead" binding:"required"`
 }
 
-func (h handler) initUser(context *gin.Context) {
+// FIXME если нет текущей книги, возвращает пустую структуру книги
+func (h handler) getCurrentBook(context *gin.Context) {
 	userId := context.Param("userId")
 	var userData books.UserData
 	var currentBook books.Book
@@ -46,19 +47,27 @@ func (h handler) initUser(context *gin.Context) {
 		return nil
 	})
 
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"currentBook": false})
-		return
-	}
-
+	var isFound bool
 	for _, book := range userData.Books {
 		if userData.CurrentBookId == book.ID {
 			currentBook = book
+			isFound = true
 			break
 		}
 	}
 
-	context.JSON(http.StatusOK, gin.H{"currentBook": currentBook})
+	if !isFound {
+		context.JSON(http.StatusOK, gin.H{"error": true})
+		return
+	}
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": true})
+		return
+	}
+
+	pagesReadToday := countPagesReadToday(currentBook.PagesRead)
+	context.JSON(http.StatusOK, gin.H{"currentBook": currentBook, "pagesReadToday": pagesReadToday})
 
 }
 
@@ -262,6 +271,82 @@ func (h handler) deleteBook(context *gin.Context) {
 }
 
 func (h handler) updateCurrentPage(context *gin.Context) {
+	bookId := context.Param("bookId")
+	userId := context.Param("userId")
+
+	var currentBook books.Book
+	var userData books.UserData
+
+	var input updateBookInput
+	if err := context.ShouldBindJSON(&input); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.DB.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("Books"))
+		if bucket == nil {
+			return bolt.ErrBucketNotFound
+		}
+
+		userDataDb := bucket.Get([]byte(userId))
+		if userDataDb == nil {
+			return bolt.ErrBucketNotFound
+		}
+
+		if err := json.Unmarshal(userDataDb, &userData); err != nil {
+			return err
+		}
+
+		for _, book := range userData.Books {
+			if book.ID == bookId {
+				currentBook = book
+				break
+			}
+		}
+
+		if currentBook.IsDone {
+			return nil
+		}
+
+		currentBook.PagesRead[time.Now()] = input.PagesRead
+		currentBook.UpdatedAt = time.Now()
+
+		if currentBook.CurrentPage+input.PagesRead >= currentBook.TotalPages {
+			currentBook.IsDone = true
+			currentBook.FinishedAt = time.Now()
+			currentBook.CurrentPage = currentBook.TotalPages
+		} else {
+			currentBook.CurrentPage += input.PagesRead
+		}
+
+		for i, book := range userData.Books {
+			if book.ID == currentBook.ID {
+				userData.Books[i] = currentBook
+				break
+			}
+		}
+
+		userDataJson, err := json.Marshal(userData)
+		if err != nil {
+			return err
+		}
+
+		return bucket.Put([]byte(userId), userDataJson)
+	})
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	pagesReadToday := countPagesReadToday(currentBook.PagesRead)
+
+	context.JSON(http.StatusOK, gin.H{"book": currentBook, "pagesReadToday": pagesReadToday})
+}
+
+// TODO добавить новый эндпоинт
+func (h handler) setCurrentBook(context *gin.Context) {
 	bookId := context.Param("bookId")
 	userId := context.Param("userId")
 

@@ -1,33 +1,35 @@
-import { fetchBook } from "@/entities/book";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 import { fetchUpdatePagesRead, ReturnData } from "../models/api/api";
 import cls from "./update-pages-read.module.scss";
 
-export const UpdatePagesRead: FC = () => {
+interface UpdatePagesReadProps {
+  dailyGoal?: number;
+  bookId?: string;
+}
+
+export const UpdatePagesRead: FC<UpdatePagesReadProps> = (props) => {
+  const { dailyGoal, bookId } = props;
   const [pagesRead, setPagesRead] = useState<number>(0);
-  const [id, setId] = useState<string>("");
 
   const queryClient = useQueryClient();
-
-  const { data } = useQuery({
-    queryKey: ["book"],
-    queryFn: fetchBook,
-  });
 
   const { mutate } = useMutation({
     mutationFn: fetchUpdatePagesRead,
     onSuccess: (data: ReturnData) => {
       queryClient.setQueryData(["book"], {
-        book: data.book,
+        currentBook: data.book,
         pagesReadToday: data.pagesReadToday,
       });
     },
   });
 
   const onSubmit = () => {
-    mutate({ pagesRead, id });
-    setPagesRead(data?.book.dailyGoal ?? 0);
+    if (!bookId) {
+      return;
+    }
+    mutate({ pagesRead, bookId });
+    setPagesRead(dailyGoal ?? 0);
   };
 
   const handleIncrement = () => {
@@ -41,9 +43,8 @@ export const UpdatePagesRead: FC = () => {
   };
 
   useEffect(() => {
-    setPagesRead(data?.book.dailyGoal ?? 0);
-    setId(data?.book.ID ?? "");
-  }, [data?.book.dailyGoal, data?.book.ID]);
+    setPagesRead(dailyGoal ?? 0);
+  }, [dailyGoal]);
 
   return (
     <section>

@@ -1,26 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
-import { FC, useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { fetchBook } from '../api/api';
+import { FC } from "react";
 
-export const BookTitle: FC = () => {
-  const navigate = useNavigate();
+interface BookTitleProps {
+  title?: string;
+  author?: string;
+}
 
-  const { data } = useQuery({
-    queryKey: ['books'],
-    queryFn: fetchBook,
-  });
-
-  useEffect(() => {
-    if (!data?.book) {
-      navigate('/new');
-    }
-  });
+export const BookTitle: FC<BookTitleProps> = (props) => {
+  const { title, author } = props;
 
   return (
     <section>
-      <h1>{data?.book[data.book.length - 1].title}</h1>
-      <h2>{data?.book[data.book.length - 1].author}</h2>
+      <h1>{title}</h1>
+      <h2>{author}</h2>
     </section>
   );
 };

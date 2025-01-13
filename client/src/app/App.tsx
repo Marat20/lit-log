@@ -1,8 +1,8 @@
-import { BookListPage } from '@/pages/booklist-page';
-import { NewBookPage } from '@/pages/newbook-page';
-import { ProgressPage } from '@/pages/progress-page';
-import { Footer } from '@/shared/ui/footer/footer';
-import { Route, Routes } from 'react-router';
+import { BookListPage } from "@/pages/booklist-page";
+import { NewBookPage } from "@/pages/newbook-page";
+import { ProgressPage } from "@/pages/progress-page";
+import { Footer } from "@/shared/ui/footer/footer";
+import { Route, Routes } from "react-router";
 
 export const App = () => {
   return (

@@ -5,6 +5,7 @@ export const Footer = () => {
   return (
     <footer className={cls.footer}>
       <Link to={"/books"}>Books</Link>
+      <Link to={"/new"}>New</Link>
       <Link to={"/"}>Home</Link>
     </footer>
   );
