@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	bookControllers "lit-log/internal/controllers/book_controllers"
 	telegramControllers "lit-log/internal/controllers/telegram_controllers"
 	"lit-log/internal/pkg/config"
@@ -11,6 +13,9 @@ import (
 )
 
 func main() {
+
+	port := flag.Int("port", 8080, "serve port")
+	flag.Parse()
 
 	log, err := logging.New()
 	if err != nil {
@@ -40,5 +45,5 @@ func main() {
 
 	telegramControllers.RegisterRoutes(tg, db)
 
-	server.Run()
+	server.Run(fmt.Sprintf(":%d", *port))
 }

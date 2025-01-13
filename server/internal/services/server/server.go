@@ -10,5 +10,7 @@ func New() *gin.Engine {
 
 	r.Use(cors.Default())
 
+	r.Static("/assets", "./dist/assets")
+
 	return r
 }

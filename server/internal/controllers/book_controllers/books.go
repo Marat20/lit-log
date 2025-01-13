@@ -2,6 +2,7 @@ package book_controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"lit-log/internal/models/books"
 	"net/http"
 	"time"
@@ -25,34 +26,39 @@ type updateBookInput struct {
 
 func (h handler) initUser(context *gin.Context) {
 	userId := context.Param("userId")
+	var userData books.UserData
+	var currentBook books.Book
 
 	err := h.DB.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Books"))
-		if b == nil {
+		bucket := tx.Bucket([]byte("Books"))
+		if bucket == nil {
 			return bolt.ErrBucketNotFound
 		}
 
-		userData := b.Get([]byte(userId))
-		if userData == nil {
-			books := []books.Book{}
-
-			booksJson, err := json.Marshal(books)
-			if err != nil {
-				return err
-			}
-
-			return b.Put([]byte(userId), booksJson)
+		userDataDb := bucket.Get([]byte(userId))
+		if userDataDb == nil {
+			return errors.New("user's data is not found")
+		}
+		if err := json.Unmarshal(userDataDb, &userData); err != nil {
+			return err
 		}
 
 		return nil
 	})
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Запись не существует"})
+		context.JSON(http.StatusBadRequest, gin.H{"currentBook": false})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"success": true})
+	for _, book := range userData.Books {
+		if userData.CurrentBookId == book.ID {
+			currentBook = book
+			break
+		}
+	}
+
+	context.JSON(http.StatusOK, gin.H{"currentBook": currentBook})
 
 }
 
@@ -60,37 +66,44 @@ func (h handler) getBook(context *gin.Context) {
 	userId := context.Param("userId")
 	bookId := context.Param("bookId")
 
-	var booksList []books.Book
+	var userData books.UserData
 
 	err := h.DB.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Books"))
-		if b == nil {
+		bucket := tx.Bucket([]byte("Books"))
+		if bucket == nil {
 			return bolt.ErrBucketNotFound
 		}
 
-		booksData := b.Get([]byte(userId))
-		if booksData == nil {
+		userDataDb := bucket.Get([]byte(userId))
+		if userDataDb == nil {
 			return bolt.ErrBucketNotFound
 		}
 
-		if err := json.Unmarshal(booksData, &booksList); err != nil {
+		if err := json.Unmarshal(userDataDb, &userData); err != nil {
 			return err
 		}
 		return nil
 	})
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Запись не существует"})
+		context.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
 	var book books.Book
+	var foundBook bool
 
-	for _, val := range booksList {
+	for _, val := range userData.Books {
 		if bookId == val.ID {
 			book = val
+			foundBook = true
 			break
 		}
+	}
+
+	if !foundBook {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "запись не найдена"})
+		return
 	}
 
 	pagesReadToday := countPagesReadToday(book.PagesRead)
@@ -100,20 +113,20 @@ func (h handler) getBook(context *gin.Context) {
 
 func (h handler) getAllBooks(context *gin.Context) {
 	userId := context.Param("userId")
-	var allBooks []books.Book
+	var userData books.UserData
 
 	err := h.DB.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Books"))
-		if b == nil {
+		bucket := tx.Bucket([]byte("Books"))
+		if bucket == nil {
 			return bolt.ErrBucketNotFound
 		}
 
-		booksData := b.Get([]byte(userId))
-		if booksData == nil {
+		userDataDb := bucket.Get([]byte(userId))
+		if userDataDb == nil {
 			return bolt.ErrBucketNotFound
 		}
 
-		if err := json.Unmarshal(booksData, &allBooks); err != nil {
+		if err := json.Unmarshal(userDataDb, &userData); err != nil {
 			return err
 		}
 
@@ -125,10 +138,13 @@ func (h handler) getAllBooks(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"books": allBooks})
+	context.JSON(http.StatusOK, gin.H{"books": userData.Books})
 }
 
 func (h handler) addBook(context *gin.Context) {
+	userId := context.Param("userId")
+	var userData books.UserData
+
 	var input createBookInput
 	if err := context.ShouldBindJSON(&input); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -146,23 +162,34 @@ func (h handler) addBook(context *gin.Context) {
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 		CurrentPage: 0,
-		IsActive:    true,
 		IsDone:      false,
 		PagesRead:   make(map[time.Time]uint),
 	}
 
 	err := h.DB.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Books"))
-		if b == nil {
+		bucket := tx.Bucket([]byte("Books"))
+		if bucket == nil {
 			return bolt.ErrBucketNotFound
 		}
 
-		bookData, err := json.Marshal(book)
+		userDataDb := bucket.Get([]byte(userId))
+		if userDataDb == nil {
+			return bolt.ErrBucketNotFound
+		}
+
+		if err := json.Unmarshal(userDataDb, &userData); err != nil {
+			return err
+		}
+
+		userData.Books = append(userData.Books, book)
+		userData.CurrentBookId = book.ID
+
+		userDataJson, err := json.Marshal(userData)
 		if err != nil {
 			return err
 		}
 
-		return b.Put([]byte(book.ID), bookData)
+		return bucket.Put([]byte(userId), userDataJson)
 
 	})
 
@@ -177,20 +204,49 @@ func (h handler) addBook(context *gin.Context) {
 }
 
 func (h handler) deleteBook(context *gin.Context) {
-	bookID := context.Param("id")
+	bookId := context.Param("bookId")
+	userId := context.Param("userId")
+	var userData books.UserData
 
 	err := h.DB.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Books"))
-		if b == nil {
+		bucket := tx.Bucket([]byte("Books"))
+		if bucket == nil {
 			return bolt.ErrBucketNotFound
 		}
 
-		bookData := b.Get([]byte(bookID))
-		if bookData == nil {
+		userDataDb := bucket.Get([]byte(userId))
+		if userDataDb == nil {
 			return bolt.ErrBucketNotFound
 		}
 
-		return b.Delete([]byte(bookID))
+		if err := json.Unmarshal(userDataDb, &userData); err != nil {
+			return err
+		}
+
+		newBooks := []books.Book{}
+
+		for _, item := range userData.Books {
+			if item.ID != bookId {
+				newBooks = append(newBooks, item)
+			}
+		}
+
+		userData.Books = newBooks
+
+		if userData.CurrentBookId == bookId {
+			if len(userData.Books) > 0 {
+				userData.CurrentBookId = userData.Books[len(userData.Books)-1].ID
+			} else {
+				userData.CurrentBookId = ""
+			}
+		}
+
+		userDataJson, err := json.Marshal(userData)
+		if err != nil {
+			return err
+		}
+
+		return bucket.Put([]byte(userId), userDataJson)
 	})
 
 	if err != nil {
@@ -206,9 +262,11 @@ func (h handler) deleteBook(context *gin.Context) {
 }
 
 func (h handler) updateCurrentPage(context *gin.Context) {
-	bookId := context.Param("id")
+	bookId := context.Param("bookId")
+	userId := context.Param("userId")
 
-	var book books.Book
+	var currentBook books.Book
+	var userData books.UserData
 
 	var input updateBookInput
 	if err := context.ShouldBindJSON(&input); err != nil {
@@ -217,42 +275,55 @@ func (h handler) updateCurrentPage(context *gin.Context) {
 	}
 
 	err := h.DB.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("Books"))
-		if b == nil {
+		bucket := tx.Bucket([]byte("Books"))
+		if bucket == nil {
 			return bolt.ErrBucketNotFound
 		}
 
-		bookData := b.Get([]byte(bookId))
-		if bookData == nil {
+		userDataDb := bucket.Get([]byte(userId))
+		if userDataDb == nil {
 			return bolt.ErrBucketNotFound
 		}
 
-		if err := json.Unmarshal(bookData, &book); err != nil {
+		if err := json.Unmarshal(userDataDb, &userData); err != nil {
 			return err
 		}
 
-		if book.IsDone {
+		for _, book := range userData.Books {
+			if book.ID == bookId {
+				currentBook = book
+				break
+			}
+		}
+
+		if currentBook.IsDone {
 			return nil
 		}
 
-		book.PagesRead[time.Now()] = input.PagesRead
-		book.UpdatedAt = time.Now()
+		currentBook.PagesRead[time.Now()] = input.PagesRead
+		currentBook.UpdatedAt = time.Now()
 
-		if book.CurrentPage+input.PagesRead >= book.TotalPages {
-			book.IsActive = false
-			book.IsDone = true
-			book.FinishedAt = time.Now()
-			book.CurrentPage = book.TotalPages
+		if currentBook.CurrentPage+input.PagesRead >= currentBook.TotalPages {
+			currentBook.IsDone = true
+			currentBook.FinishedAt = time.Now()
+			currentBook.CurrentPage = currentBook.TotalPages
 		} else {
-			book.CurrentPage += input.PagesRead
+			currentBook.CurrentPage += input.PagesRead
 		}
 
-		updatedBook, err := json.Marshal(book)
+		for i, book := range userData.Books {
+			if book.ID == currentBook.ID {
+				userData.Books[i] = currentBook
+				break
+			}
+		}
+
+		userDataJson, err := json.Marshal(userData)
 		if err != nil {
 			return err
 		}
 
-		return b.Put([]byte(book.ID), updatedBook)
+		return bucket.Put([]byte(userId), userDataJson)
 	})
 
 	if err != nil {
@@ -260,9 +331,9 @@ func (h handler) updateCurrentPage(context *gin.Context) {
 		return
 	}
 
-	pagesReadToday := countPagesReadToday(book.PagesRead)
+	pagesReadToday := countPagesReadToday(currentBook.PagesRead)
 
-	context.JSON(http.StatusOK, gin.H{"book": book, "pagesReadToday": pagesReadToday})
+	context.JSON(http.StatusOK, gin.H{"book": currentBook, "pagesReadToday": pagesReadToday})
 }
 
 func countPagesReadToday(pagesRead map[time.Time]uint) uint {

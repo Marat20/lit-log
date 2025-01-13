@@ -14,6 +14,10 @@ func RegisterRoutes(r *gin.Engine, db *bolt.DB) {
 		DB: db,
 	}
 
+	r.GET("/", func(c *gin.Context) {
+		c.File("./dist/index.html")
+	})
+
 	routes := r.Group("/:userId")
 	routes.GET("/init", h.initUser)
 	routes.GET("/:bookId", h.getBook)

@@ -9,6 +9,7 @@ import (
 
 func ConnectDB(cfg config.Config, log *slog.Logger) (*bolt.DB, error) {
 	path := cfg.Db.Path
+
 	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {
 		return nil, err

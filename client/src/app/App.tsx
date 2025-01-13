@@ -1,28 +1,18 @@
-import { URL } from "@/shared/api/api";
-import { TG } from "@/shared/consts/consts";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { BookListPage } from '@/pages/booklist-page';
+import { NewBookPage } from '@/pages/newbook-page';
+import { ProgressPage } from '@/pages/progress-page';
+import { Footer } from '@/shared/ui/footer/footer';
+import { Route, Routes } from 'react-router';
 
 export const App = () => {
-  const userId = TG.initData.user.id;
-
-  const { data } = useQuery({
-    queryKey: ["user"],
-    queryFn: () => fetch(`${URL}/api/user/${userId}`).then((res) => res.json()),
-  });
-
-  useEffect(() => {
-    console.log(data);
-  });
-
   return (
     <main className='main'>
-      <div>Welcome to TG mini APP</div>
-      {/* <Routes>
-        <Route index element={<ProgressPageLazy />} />
-        <Route path='/books' element={<BookListPageLazy />} />
+      <Routes>
+        <Route index element={<ProgressPage />} />
+        <Route path='/books' element={<BookListPage />} />
+        <Route path='/new' element={<NewBookPage />} />
       </Routes>
-      <Footer /> */}
+      <Footer />
     </main>
   );
 };

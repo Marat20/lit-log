@@ -5,7 +5,7 @@ import cls from "./book.module.scss";
 
 export const BookProgressTotalPages: FC = () => {
   const { data } = useQuery({
-    queryKey: ["book"],
+    queryKey: ["books"],
     queryFn: fetchBook,
   });
 

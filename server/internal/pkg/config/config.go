@@ -21,9 +21,10 @@ func LoadConfig() *Config {
 	if err != nil {
 		log.Println("Error loading .env file, using default config")
 	}
+
 	return &Config{
 		Db: DbConfig{
-			Path: os.Getenv("PATH"),
+			Path: os.Getenv("DB_PATH"),
 		},
 		TgToken: os.Getenv("TELEGRAM_API_TOKEN"),
 	}
