@@ -8,7 +8,7 @@ interface Data {
 }
 
 export interface ReturnData {
-  book: Book;
+  currentBook: Book;
   pagesReadToday: number;
 }
 

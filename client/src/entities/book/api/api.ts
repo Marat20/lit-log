@@ -18,3 +18,14 @@ export const fetchBook = async (): Promise<Data | undefined> => {
     console.error(error);
   }
 };
+
+export const init = async () => {
+  try {
+    const response = await fetch(`${URL}/${userId}/init`);
+    const result = await response.json();
+
+    return result;
+  } catch (error) {
+    console.error(error);
+  }
+};

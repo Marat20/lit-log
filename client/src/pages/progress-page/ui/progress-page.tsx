@@ -3,6 +3,7 @@ import {
   BookProgressTotalPages,
   BookTitle,
   fetchBook,
+  init,
 } from "@/entities/book";
 import { UpdatePagesRead } from "@/features/update-pages-read";
 import { useQuery } from "@tanstack/react-query";
@@ -11,9 +12,15 @@ import { FC } from "react";
 const ProgressPage: FC = () => {
   // const navigate = useNavigate();
 
+  const { data: bookId } = useQuery({
+    queryKey: ["bookId"],
+    queryFn: init,
+  });
+
   const { data, isLoading } = useQuery({
-    queryKey: ["book"],
+    queryKey: ["book", bookId],
     queryFn: fetchBook,
+    enabled: !!bookId,
   });
 
   if (isLoading) {

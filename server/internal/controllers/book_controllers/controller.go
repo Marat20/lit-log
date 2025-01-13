@@ -19,6 +19,7 @@ func RegisterRoutes(r *gin.Engine, db *bolt.DB) {
 	})
 
 	routes := r.Group("/:userId")
+	routes.GET("/init", h.init)
 	routes.GET("/getCurrentBook", h.getCurrentBook)
 	routes.GET("/:bookId", h.getBook)
 	routes.GET("/books", h.getAllBooks)

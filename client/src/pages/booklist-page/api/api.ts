@@ -12,3 +12,16 @@ export const fetchBooks = async (): Promise<{ books: Book[] } | undefined> => {
     console.error(error);
   }
 };
+
+export const setCurrentBook = async ({ bookId }: { bookId: string }) => {
+  try {
+    const response = await fetch(`${URL}/${userId}/setBook/${bookId}`, {
+      method: "PUT",
+    });
+    const result = await response.json();
+
+    return result;
+  } catch (error) {
+    console.error(error);
+  }
+};

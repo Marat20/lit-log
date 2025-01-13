@@ -18,8 +18,11 @@ export const UpdatePagesRead: FC<UpdatePagesReadProps> = (props) => {
     mutationFn: fetchUpdatePagesRead,
     onSuccess: (data: ReturnData) => {
       queryClient.setQueryData(["book"], {
-        currentBook: data.book,
+        currentBook: data.currentBook,
         pagesReadToday: data.pagesReadToday,
+      });
+      queryClient.setQueryData(["bookId"], {
+        bookId: data.currentBook.id
       });
     },
   });

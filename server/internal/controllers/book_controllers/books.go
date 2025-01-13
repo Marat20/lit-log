@@ -24,7 +24,36 @@ type updateBookInput struct {
 	PagesRead uint `json:"pagesRead" binding:"required"`
 }
 
-// FIXME если нет текущей книги, возвращает пустую структуру книги
+func (h handler) init(context *gin.Context) {
+	userId := context.Param("userId")
+	var userData books.UserData
+
+	err := h.DB.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("Books"))
+		if bucket == nil {
+			return bolt.ErrBucketNotFound
+		}
+
+		userDataDb := bucket.Get([]byte(userId))
+		if userDataDb == nil {
+			return errors.New("user's data is not found")
+		}
+		if err := json.Unmarshal(userDataDb, &userData); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": true})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"bookId": userData.CurrentBookId})
+
+}
+
 func (h handler) getCurrentBook(context *gin.Context) {
 	userId := context.Param("userId")
 	var userData books.UserData
@@ -342,22 +371,15 @@ func (h handler) updateCurrentPage(context *gin.Context) {
 
 	pagesReadToday := countPagesReadToday(currentBook.PagesRead)
 
-	context.JSON(http.StatusOK, gin.H{"book": currentBook, "pagesReadToday": pagesReadToday})
+	context.JSON(http.StatusOK, gin.H{"currentBook": currentBook, "pagesReadToday": pagesReadToday})
 }
 
-// TODO добавить новый эндпоинт
 func (h handler) setCurrentBook(context *gin.Context) {
 	bookId := context.Param("bookId")
 	userId := context.Param("userId")
 
 	var currentBook books.Book
 	var userData books.UserData
-
-	var input updateBookInput
-	if err := context.ShouldBindJSON(&input); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
 
 	err := h.DB.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("Books"))
@@ -374,31 +396,11 @@ func (h handler) setCurrentBook(context *gin.Context) {
 			return err
 		}
 
-		for _, book := range userData.Books {
-			if book.ID == bookId {
-				currentBook = book
-				break
-			}
-		}
+		userData.CurrentBookId = bookId
 
-		if currentBook.IsDone {
-			return nil
-		}
-
-		currentBook.PagesRead[time.Now()] = input.PagesRead
-		currentBook.UpdatedAt = time.Now()
-
-		if currentBook.CurrentPage+input.PagesRead >= currentBook.TotalPages {
-			currentBook.IsDone = true
-			currentBook.FinishedAt = time.Now()
-			currentBook.CurrentPage = currentBook.TotalPages
-		} else {
-			currentBook.CurrentPage += input.PagesRead
-		}
-
-		for i, book := range userData.Books {
-			if book.ID == currentBook.ID {
-				userData.Books[i] = currentBook
+		for _, val := range userData.Books {
+			if bookId == val.ID {
+				currentBook = val
 				break
 			}
 		}
@@ -417,8 +419,7 @@ func (h handler) setCurrentBook(context *gin.Context) {
 	}
 
 	pagesReadToday := countPagesReadToday(currentBook.PagesRead)
-
-	context.JSON(http.StatusOK, gin.H{"book": currentBook, "pagesReadToday": pagesReadToday})
+	context.JSON(http.StatusOK, gin.H{"currentBook": currentBook, "pagesReadToday": pagesReadToday})
 }
 
 func countPagesReadToday(pagesRead map[time.Time]uint) uint {
