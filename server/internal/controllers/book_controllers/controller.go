@@ -23,7 +23,7 @@ func RegisterRoutes(r *gin.Engine, db *bolt.DB) {
 	routes.GET("/getCurrentBook", h.getCurrentBook)
 	routes.GET("/:bookId", h.getBook)
 	routes.GET("/books", h.getAllBooks)
-	routes.POST("/", h.addBook)
+	routes.POST("/new", h.addBook)
 	routes.DELETE("/:bookId", h.deleteBook)
 	routes.PUT("/:bookId", h.updateCurrentPage)
 	routes.PUT("/setBook/:bookId", h.setCurrentBook)

@@ -1,5 +1,7 @@
+import { Form } from "@/widgets/form";
+
 const NewBookPage = () => {
-  return <div>newbook-page</div>;
+  return <Form />;
 };
 
 export default NewBookPage;

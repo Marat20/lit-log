@@ -21,5 +21,6 @@ func New() *gin.Engine {
 
 	r.Static("/assets", "./dist/assets")
 
+
 	return r
 }

@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
-  const API = isDev ? 'http://localhost:8080' : 'https://litlog.shop/';
+  const API = isDev ? 'http://localhost:8080' : 'https://litlog.shop';
 
   return {
     plugins: [react()],

@@ -12,7 +12,12 @@ import (
 	"lit-log/internal/services/telegram"
 )
 
+// //go:embed asset
+// var fs embed.FS
+
 func main() {
+
+	// x, _ := fs.ReadFile("asset/in")
 
 	port := flag.Int("port", 8080, "serve port")
 	flag.Parse()

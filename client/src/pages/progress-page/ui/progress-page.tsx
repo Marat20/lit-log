@@ -13,7 +13,8 @@ const ProgressPage: FC = () => {
   const params = useParams<{ bookId: string }>();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["book", params.bookId],
+    queryKey: ["book"],
+    gcTime: 1,
     queryFn: () => fetchBook(params.bookId),
     enabled: !!params.bookId,
   });
