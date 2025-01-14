@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 import { fetchUpdatePagesRead, ReturnData } from "../models/api/api";
 import cls from "./update-pages-read.module.scss";
+import { useParams } from "react-router";
 
 interface UpdatePagesReadProps {
   dailyGoal?: number;
@@ -10,6 +11,7 @@ interface UpdatePagesReadProps {
 
 export const UpdatePagesRead: FC<UpdatePagesReadProps> = (props) => {
   const { dailyGoal, bookId } = props;
+  const params = useParams<{bookId: string}>()
   const [pagesRead, setPagesRead] = useState<number>(0);
 
   const queryClient = useQueryClient();
@@ -17,12 +19,9 @@ export const UpdatePagesRead: FC<UpdatePagesReadProps> = (props) => {
   const { mutate } = useMutation({
     mutationFn: fetchUpdatePagesRead,
     onSuccess: (data: ReturnData) => {
-      queryClient.setQueryData(["book"], {
-        currentBook: data.currentBook,
+      queryClient.setQueryData(["book", params.bookId], {
+        book: data.currentBook,
         pagesReadToday: data.pagesReadToday,
-      });
-      queryClient.setQueryData(["bookId"], {
-        bookId: data.currentBook.id
       });
     },
   });

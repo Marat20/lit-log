@@ -5,6 +5,7 @@
   margin-bottom: 10px;
 
   .fetch_btn {
+    cursor: pointer;
     background-color: var(--button_color);
     color: var(--button_text_color);
     border-radius: var(--border_radius);
@@ -18,6 +19,7 @@
   justify-content: space-between;
 
   .counter_btn {
+    cursor: pointer;
     background-color: var(--button_color);
     color: var(--button_text_color);
     border-radius: var(--border_radius);

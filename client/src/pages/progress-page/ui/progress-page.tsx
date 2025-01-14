@@ -3,24 +3,19 @@ import {
   BookProgressTotalPages,
   BookTitle,
   fetchBook,
-  init,
 } from "@/entities/book";
 import { UpdatePagesRead } from "@/features/update-pages-read";
 import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
+import { useParams } from "react-router";
 
 const ProgressPage: FC = () => {
-  // const navigate = useNavigate();
-
-  const { data: bookId } = useQuery({
-    queryKey: ["bookId"],
-    queryFn: init,
-  });
+  const params = useParams<{ bookId: string }>();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["book", bookId],
-    queryFn: fetchBook,
-    enabled: !!bookId,
+    queryKey: ["book", params.bookId],
+    queryFn: () => fetchBook(params.bookId),
+    enabled: !!params.bookId,
   });
 
   if (isLoading) {
@@ -31,27 +26,20 @@ const ProgressPage: FC = () => {
     return <div>Error</div>;
   }
 
-  // if (data?.error) {
-  //   navigate("/new");
-  // }
-
   return (
     <>
-      <BookTitle
-        title={data?.currentBook?.title}
-        author={data?.currentBook?.author}
-      />
+      <BookTitle title={data?.book?.title} author={data?.book?.author} />
       <BookProgressTotalPages
-        currentPage={data?.currentBook?.currentPage}
-        totalPages={data?.currentBook?.totalPages}
+        currentPage={data?.book?.currentPage}
+        totalPages={data?.book?.totalPages}
       />
       <BookProgressDailyGoal
         pagesReadToday={data?.pagesReadToday}
-        dailyGoal={data?.currentBook?.dailyGoal}
+        dailyGoal={data?.book?.dailyGoal}
       />
       <UpdatePagesRead
-        dailyGoal={data?.currentBook?.dailyGoal}
-        bookId={data?.currentBook?.id}
+        dailyGoal={data?.book?.dailyGoal}
+        bookId={data?.book?.id}
       />
     </>
   );

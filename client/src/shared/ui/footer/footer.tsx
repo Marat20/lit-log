@@ -1,7 +1,8 @@
+import { memo } from "react";
 import { Link } from "react-router";
 import cls from "./footer.module.scss";
 
-export const Footer = () => {
+export const Footer = memo(() => {
   return (
     <footer className={cls.footer}>
       <Link to={"/books"}>Books</Link>
@@ -9,4 +10,4 @@ export const Footer = () => {
       <Link to={"/"}>Home</Link>
     </footer>
   );
-};
+});
