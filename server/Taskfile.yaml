@@ -1,7 +1,9 @@
-version: '3'
+version: "3"
 
 vars:
   NAME: lit-log
+
+dotenv: [".env"]
 
 tasks:
   clean:
@@ -18,18 +20,7 @@ tasks:
 
   build:
     cmds:
-      - task: build_windows
-      - task: build_linux
-
-  build_windows:
-    env:
-      GOARCH: amd64
-      GOOS: windows
-      GODEBUG: cgocheck=0
-    cmds:
-      - cmd: mkdir build
-        ignore_error: true
-      - go build -v -o build/{{.NAME}}.exe cmd/main.go
+      task: build_linux
 
   build_linux:
     env:
@@ -40,3 +31,7 @@ tasks:
       - cmd: mkdir build
         ignore_error: true
       - go build -v -o build/{{.NAME}} cmd/main.go
+
+  # publish:
+  #   cmds:
+  #     - cmd: scp -P $SSH_PORT C:\Users\Марат\Downloads\litlog.tar root@1acc07ed7a30.vps.myjino.ru:/home

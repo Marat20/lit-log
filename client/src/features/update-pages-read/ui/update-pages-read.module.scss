@@ -1,10 +1,11 @@
 .fetch_btn_block {
   display: flex;
+  gap: 10px;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
 
-  .fetch_btn {
+  .fetch_btn,
+  .counter_btn {
     cursor: pointer;
     background-color: var(--button_color);
     color: var(--button_text_color);
@@ -12,17 +13,9 @@
     width: 100%;
     padding: 10px 0;
   }
-}
-
-.counter_btn_block {
-  display: flex;
-  justify-content: space-between;
 
   .counter_btn {
-    cursor: pointer;
-    background-color: var(--button_color);
-    color: var(--button_text_color);
-    border-radius: var(--border_radius);
+    width: auto;
     padding: 10px 20px;
   }
 }

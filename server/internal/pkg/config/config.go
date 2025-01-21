@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -17,10 +16,8 @@ type DbConfig struct {
 }
 
 func LoadConfig() *Config {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Error loading .env file, using default config")
-	}
+
+	godotenv.Load()
 
 	return &Config{
 		Db: DbConfig{

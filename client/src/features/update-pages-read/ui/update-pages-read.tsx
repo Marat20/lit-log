@@ -49,13 +49,11 @@ export const UpdatePagesRead: FC<UpdatePagesReadProps> = (props) => {
   return (
     <section>
       <div className={cls.fetch_btn_block}>
-        <button className={cls.fetch_btn} onClick={onSubmit}>
-          {pagesRead}
-        </button>
-      </div>
-      <div className={cls.counter_btn_block}>
         <button className={cls.counter_btn} onClick={handleDecrement}>
           -
+        </button>
+        <button className={cls.fetch_btn} onClick={onSubmit}>
+          {pagesRead}
         </button>
         <button className={cls.counter_btn} onClick={handleIncrement}>
           +

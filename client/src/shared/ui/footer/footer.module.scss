@@ -1,8 +1,18 @@
 .footer {
+  display: flex;
+  align-items: center;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 30px;
-  background-color: aqua;
+  height: 50px;
+  background-color: var(--section_bg_color);
+  border-radius: var(--border_radius);
+
+  .footer__container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    padding: 0 20px;
+  }
 }

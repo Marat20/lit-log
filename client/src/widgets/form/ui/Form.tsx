@@ -52,16 +52,16 @@ export const Form = () => {
   const { mutate } = useMutation({
     mutationFn: addNewBook,
     onSuccess: (data) => {
-      queryClient.setQueryData(["book", data.book.id], {
+      queryClient.setQueryData(["book"], {
         book: data.book,
         pagesReadToday: data.pagesReadToday,
       });
+      navigate(`/${data.book.id}`);
     },
   });
 
   const onSubmit = handleSubmit((data) => {
     mutate({ ...data });
-    navigate("/");
   });
 
   return (
