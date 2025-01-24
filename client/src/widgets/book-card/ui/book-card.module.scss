@@ -1,0 +1,15 @@
+.card {
+  padding: 10px;
+  border-radius: var(--border_radius);
+  background-color: var(--section_bg_color);
+  margin-bottom: 10px;
+
+  .down {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .btn_delete {
+    
+  }
+}

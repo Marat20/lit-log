@@ -1,5 +1,4 @@
 import { URL } from "@/shared/api/api";
-import { userId } from "@/shared/consts/telegram";
 import { Book } from "../model/types/book";
 
 interface FetchBookReturnData {
@@ -12,7 +11,7 @@ export const fetchBook = async (
   bookId?: string,
 ): Promise<FetchBookReturnData | undefined> => {
   try {
-    const response = await fetch(`${URL}/${userId}/${bookId}`);
+    const response = await fetch(`${URL}/${bookId}`);
     const result = await response.json();
 
     return result;
@@ -27,7 +26,7 @@ interface InitReturnData {
 
 export const init = async (): Promise<InitReturnData | undefined> => {
   try {
-    const response = await fetch(`${URL}/${userId}/init`);
+    const response = await fetch(`${URL}/init`);
     const result = await response.json();
 
     return result;

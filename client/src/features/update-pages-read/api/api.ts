@@ -1,6 +1,5 @@
 import { Book } from "@/entities/book";
 import { URL } from "@/shared/api/api";
-import { userId } from "@/shared/consts/telegram";
 
 interface Data {
   pagesRead: number;
@@ -15,7 +14,7 @@ export interface ReturnData {
 export const fetchUpdatePagesRead = async (data: Data) => {
   const { pagesRead, bookId } = data;
   try {
-    const response = await fetch(`${URL}/${userId}/${bookId}`, {
+    const response = await fetch(`${URL}/${bookId}`, {
       method: "PUT",
       body: JSON.stringify({ pagesRead }),
     });

@@ -1,6 +1,5 @@
 import { Book } from "@/entities/book";
 import { URL } from "@/shared/api/api";
-import { userId } from "@/shared/consts/telegram";
 
 interface AddNewBookData {
   title: string;
@@ -16,7 +15,7 @@ export interface AddNewBookReturnData {
 
 export const addNewBook = async (data: AddNewBookData) => {
   try {
-    const response = await fetch(`${URL}/${userId}/new`, {
+    const response = await fetch(`${URL}/new`, {
       method: "POST",
       body: JSON.stringify({ ...data }),
     });
