@@ -1,18 +1,16 @@
 import { URL } from "@/shared/api/api";
 import { Book } from "../model/types/book";
 
-interface FetchBookReturnData {
+export interface FetchBookReturnData {
   book?: Book;
   pagesReadToday?: number;
   error?: string;
 }
 
-export const fetchBook = async (
-  bookId?: string,
-): Promise<FetchBookReturnData | undefined> => {
+export const fetchBook = async (bookId?: string) => {
   try {
     const response = await fetch(`${URL}/${bookId}`);
-    const result = await response.json();
+    const result: FetchBookReturnData = await response.json();
 
     return result;
   } catch (error) {

@@ -1,3 +1,4 @@
+import { FetchBookReturnData } from "@/entities/book/api/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 import { fetchUpdatePagesRead } from "../api/api";
@@ -16,6 +17,24 @@ export const UpdatePagesRead: FC<UpdatePagesReadProps> = (props) => {
 
   const { mutate } = useMutation({
     mutationFn: fetchUpdatePagesRead,
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: ["book"] });
+      const previousData = queryClient.getQueryData<FetchBookReturnData>([
+        "book",
+      ]);
+
+      queryClient.setQueryData(["book"], (old: FetchBookReturnData) => ({
+        ...old,
+        book: {
+          ...old.book,
+          currentPage: old.book?.currentPage || 0 + pagesRead,
+        },
+        pagesReadToday: (old?.pagesReadToday || 0) + newData.pagesRead,
+      }));
+
+      return { previousData };
+    },
+
     onSuccess: (data) => {
       queryClient.setQueryData(["book"], {
         book: data.currentBook,

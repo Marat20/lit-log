@@ -1,15 +1,23 @@
 .card {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
   padding: 10px;
   border-radius: var(--border_radius);
   background-color: var(--section_bg_color);
   margin-bottom: 10px;
 
-  .down {
-    display: flex;
-    justify-content: space-between;
+  &__info {
+    width: 100%;
   }
 
-  .btn_delete {
-    
+  &__pages {
+    display: flex;
+    align-self: center;
+  }
+
+  &__link {
+    display: flex;
+    flex-grow: 1;
   }
 }

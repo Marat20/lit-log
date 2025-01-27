@@ -1,6 +1,5 @@
 import { BookCard } from "@/entities/book";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router";
 import { fetchBooks } from "../api/api";
 
 const BookListPage = () => {
@@ -25,6 +24,10 @@ const BookListPage = () => {
   //   mutate({ bookId });
   // };
 
+  if (data?.books.length == 0) {
+    return <div>No books</div>;
+  }
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -32,9 +35,7 @@ const BookListPage = () => {
   return (
     <>
       {data?.books.map((item) => (
-        <Link key={item.id} to={`/${item.id}`}>
-          <BookCard bookData={item} />
-        </Link>
+        <BookCard key={item.id} bookData={item} />
       ))}
     </>
   );

@@ -19,7 +19,7 @@ tasks:
       - go run --race -v cmd/main.go
 
   build:
-    cmds:
+    cmd:
       task: build_linux
 
   build_linux:
