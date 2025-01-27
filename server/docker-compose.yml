@@ -8,3 +8,4 @@ services:
       - TELEGRAM_API_TOKEN=${TELEGRAM_API_TOKEN}
     volumes:
       - ../db/litlog.db:/app/db/litlog.db
+      - ../dist:/app/dist
